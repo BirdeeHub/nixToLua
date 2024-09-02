@@ -15,7 +15,7 @@ yourNixValue = {
         thing3 = [ "give" "treat" ];
       }
       "I LOVE KEYBOARDS"
-      (nixToLua.mkLuaInline ''[[I am a]] .. [[ lua ]] .. type("value")'')
+      (nixToLua.mkLuaInline ''[[I am a]] .. [[ lua ]] .. type("value")'') # --> "I am a lua string"
     ];
     thing4 = "couch is for scratching";
   };
