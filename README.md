@@ -55,3 +55,16 @@ use mkLuaInline to allow insertion of unescaped lua code.
 lua inline values **CANNOT** be interpolated into other nix strings.
 
 other nix strings **CAN** be interpolated into lua inline values.
+
+```nix
+nix repl --show-trace
+Welcome to Nix 2.18.5. Type :? for help.
+
+nix-repl> :lf .
+Added 14 variables.
+
+nix-repl> testVals = import ./testVals.nix
+
+nix-repl> toLua testVals.yourNixValue
+"{ [ [[theBestCat]] ] = [[says meow!!]], [ [[theWorstCat]] ] = { [ [======[]=====]-!'.thing4]======] ] = [[couch is for scratching]], [ [[thing'1]] ] = { [[MEOW]], [==[]]' ]=][=[HISSS]]\"[[]==] }, [ [[thing2]] ] = { { [ [[thing3]] ] = { [[give]], [[treat]] } }, [[I LOVE KEYBOARDS]], [[I am a]] .. [[ lua ]] .. type(\"value\") } } }"
+```
