@@ -35,14 +35,14 @@ yourNixValue = {
         thing3 = [ "give" "treat" ];
       }
       "I LOVE KEYBOARDS"
-      (mkLuaInline ''[[I am a]] .. [[ lua ]] .. type("value")'') # --> "I am a lua string"
+      (nixToLua.mkLuaInline ''[[I am a]] .. [[ lua ]] .. type("value")'') # --> "I am a lua string"
       '' multi line string
       tstasddas
       ddsdaa]====]
       ''
     ];
     "]=====]-!'.thing4" = "couch is for scratching";
-    hmm = mkLuaInline /*lua*/ ''
+    hmm = nixToLua.mkLuaInline /*lua*/ ''
 
       (function ()
         local a = 1
