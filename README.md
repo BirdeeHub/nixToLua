@@ -34,7 +34,11 @@ yourNixValue = {
         thing3 = [ "give" "treat" ];
       }
       "I LOVE KEYBOARDS"
-      (nixToLua.mkLuaInline ''[[I am a]] .. [[ lua ]] .. type("value")'') # --> "I am a lua string"
+      (mkLuaInline ''[[I am a]] .. [[ lua ]] .. type("value")'') # --> "I am a lua string"
+      '' multi line string
+      tstasddas
+      ddsdaa]====]
+      ''
     ];
     "]=====]-!'.thing4" = "couch is for scratching";
   };
@@ -61,10 +65,9 @@ nix repl --show-trace
 Welcome to Nix 2.18.5. Type :? for help.
 
 nix-repl> :lf .
-Added 14 variables.
+warning: Git tree '/home/birdee/Projects/nixToLua' is dirty
+Added 13 variables.
 
-nix-repl> testVals = import ./testVals.nix
-
-nix-repl> toLua testVals.yourNixValue
-"{ [ [[theBestCat]] ] = [[says meow!!]], [ [[theWorstCat]] ] = { [ [======[]=====]-!'.thing4]======] ] = [[couch is for scratching]], [ [[thing'1]] ] = { [[MEOW]], [==[]]' ]=][=[HISSS]]\"[[]==] }, [ [[thing2]] ] = { { [ [[thing3]] ] = { [[give]], [[treat]] } }, [[I LOVE KEYBOARDS]], [[I am a]] .. [[ lua ]] .. type(\"value\") } } }"
+nix-repl> toLua (import ./testVals.nix).yourNixValue
+"{ [ [[theBestCat]] ] = [[says meow!!]], [ [[theWorstCat]] ] = { [ [======[]=====]-!'.thing4]======] ] = [[couch is for scratching]], [ [[thing'1]] ] = { [[MEOW]], [==[]]' ]=][=[HISSS]]\"[[]==] }, [ [[thing2]] ] = { { [ [[thing3]] ] = { [[give]], [[treat]] } }, [[I LOVE KEYBOARDS]], [[I am a]] .. [[ lua ]] .. type(\"value\"), [=====[multi line string\n       tstasddas\n       ddsdaa]====]\n]=====] } } }"
 ```
