@@ -8,6 +8,7 @@
       luaEnv = pkgs.luajit.withPackages (p: with p; [ inspect ]);
       examples = {
         default = ./yourNixValue.nix;
+        anotherNixValue = ./anotherNixValue.nix;
       };
       nixToLua = import ../.;
       buildExample = name: path: pkgs.writeShellScriptBin name (let
