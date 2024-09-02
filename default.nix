@@ -9,28 +9,7 @@ with builtins; {
     then toCheck.__type == "nix-to-lua-inline"
     else false;
 
-    LI2STR = LI: let
-        splitter = str: concatMap (x: if isList x then x else []) (split "(.)" str);
-        endsWith = acc: if acc == [] then "" else builtins.elemAt acc ((builtins.length acc) - 1);
-        parse = str: let
-          rm_nl = builtins.replaceStrings [ "\n" ] [ ";" ] str;
-          rm_tb = builtins.replaceStrings [ "\t" ] [ " " ] rm_nl;
-          strList = splitter rm_tb;
-          op = acc: x: let
-            lchr = endsWith acc;
-            lwasspace = lchr == " " && x == " ";
-            lwassemi = lchr == ";" && (x == ";" || x == " ");
-            strim = acc == [] && (x == " " || x == ";");
-            skip = lwassemi || lwasspace || strim;
-            res = if skip then acc else acc ++ [ x ];
-          in res;
-        in builtins.foldl' op [] strList;
-        parsed = parse LI.expr;
-        needsRMV = if endsWith parsed == ";" then true else false;
-        combined = concatStringsSep "" parsed;
-        result = if needsRMV then builtins.substring 0 (builtins.stringLength combined - 1) combined else combined;
-      in
-      result;
+    LI2STR = LI: "assert(loadstring(${luaEnclose "return ${LI.expr}"}))()";
 
     isDerivation = value: value.type or null == "derivation";
 

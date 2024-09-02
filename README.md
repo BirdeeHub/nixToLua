@@ -77,8 +77,9 @@ nix repl --show-trace
 Welcome to Nix 2.18.5. Type :? for help.
 
 nix-repl> :lf .
-Added 14 variables.
+warning: Git tree '/home/birdee/Projects/nixToLua' is dirty
+Added 13 variables.
 
 nix-repl> toLua (import ./testVals.nix).yourNixValue
-"{ [ [[theBestCat]] ] = [[says meow!!]], [ [[theWorstCat]] ] = { [ [======[]=====]-!'.thing4]======] ] = [[couch is for scratching]], [ [[hmm]] ] = (function ();local a = 1;local b = 2;local c = 3;return a+b+c;end)(), [ [[thing'1]] ] = { [[MEOW]], [==[]]' ]=][=[HISSS]]\"[[]==] }, [ [[thing2]] ] = { { [ [[thing3]] ] = { [[give]], [[treat]] } }, [[I LOVE KEYBOARDS]], [[I am a]] .. [[ lua ]] .. type(\"value\"), [=====[multi line string\n       tstasddas\n       ddsdaa]====]\n]=====] } } }"
+"{ [ [[theBestCat]] ] = [[says meow!!]], [ [[theWorstCat]] ] = { [ [======[]=====]-!'.thing4]======] ] = [[couch is for scratching]], [ [[hmm]] ] = assert(loadstring([[return \n(function ()\n  local a = 1\n  local b = 2\n\n  local c = 3\n  return a+b+c\nend)()\n\n]]))(), [ [[thing'1]] ] = { [[MEOW]], [==[]]' ]=][=[HISSS]]\"[[]==] }, [ [[thing2]] ] = { { [ [[thing3]] ] = { [[give]], [[treat]] } }, [[I LOVE KEYBOARDS]], assert(loadstring([=[return [[I am a]] .. [[ lua ]] .. type(\"value\")]=]))(), [=====[multi line string\n       tstasddas\n       ddsdaa]====]\n]=====] } } }"
 ```
