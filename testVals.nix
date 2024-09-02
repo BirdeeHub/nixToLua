@@ -16,6 +16,14 @@ with (import ./.); {
         ''
       ];
       "]=====]-!'.thing4" = "couch is for scratching";
+      hmm = mkLuaInline /*lua*/ ''
+        (function ()
+          local a = 1
+          local b = 2
+          local c = 3
+          return a+b+c
+        end)()
+      '';
     };
   };
 }

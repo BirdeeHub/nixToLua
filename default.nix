@@ -1,6 +1,9 @@
 with builtins; {
   
-  mkLuaInline = expr: { __type = "nix-to-lua-inline"; inherit expr; };
+  mkLuaInline = expr: {
+    __type = "nix-to-lua-inline";
+    expr = replaceStrings ["\n"] [";"] expr;
+  };
 
   toLua = input: let
 

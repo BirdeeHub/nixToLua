@@ -69,5 +69,5 @@ warning: Git tree '/home/birdee/Projects/nixToLua' is dirty
 Added 13 variables.
 
 nix-repl> toLua (import ./testVals.nix).yourNixValue
-"{ [ [[theBestCat]] ] = [[says meow!!]], [ [[theWorstCat]] ] = { [ [======[]=====]-!'.thing4]======] ] = [[couch is for scratching]], [ [[thing'1]] ] = { [[MEOW]], [==[]]' ]=][=[HISSS]]\"[[]==] }, [ [[thing2]] ] = { { [ [[thing3]] ] = { [[give]], [[treat]] } }, [[I LOVE KEYBOARDS]], [[I am a]] .. [[ lua ]] .. type(\"value\"), [=====[multi line string\n       tstasddas\n       ddsdaa]====]\n]=====] } } }"
+"{ [ [[theBestCat]] ] = [[says meow!!]], [ [[theWorstCat]] ] = { [ [======[]=====]-!'.thing4]======] ] = [[couch is for scratching]], [ [[hmm]] ] = (function ();  local a = 1;  local b = 2;  local c = 3;  return a+b+c;end)();, [ [[thing'1]] ] = { [[MEOW]], [==[]]' ]=][=[HISSS]]\"[[]==] }, [ [[thing2]] ] = { { [ [[thing3]] ] = { [[give]], [[treat]] } }, [[I LOVE KEYBOARDS]], [[I am a]] .. [[ lua ]] .. type(\"value\"), [=====[multi line string\n       tstasddas\n       ddsdaa]====]\n]=====] } } }"
 ```
