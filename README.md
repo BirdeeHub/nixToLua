@@ -1,8 +1,27 @@
-# convert nix to lua
+# nix to lua
+
+this repo does not need to be imported as a flake, but is able to be.
 
 ```nix
 inputs.nixToLua.url = "github:BirdeeHub/nixToLua";
+outputs = { nixToLua, ... }: {
+};
 ```
+
+- or
+
+```nix
+inputs.nixToLuaNonFlake = {
+  url = "github:BirdeeHub/nixToLua";
+  flake = false;
+};
+outputs.nixToLua = { nixToLuaNonFlake, ... }: {
+  nixToLua = import nixToLuaNonFlake;
+};
+# or any other way you can fetch it and call import on it
+```
+
+## Useage:
 
 ```nix
 yourNixValue = {
@@ -35,4 +54,4 @@ use mkLuaInline to allow insertion of unescaped lua code.
 
 lua inline values cannot be interpolated into other nix strings.
 
-this repo does not need to be imported as a flake, but is able to be.
+other nix strings CAN be interpolated into lua inline values.
