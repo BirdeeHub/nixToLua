@@ -36,7 +36,7 @@ yourNixValue = {
       "I LOVE KEYBOARDS"
       (nixToLua.mkLuaInline ''[[I am a]] .. [[ lua ]] .. type("value")'') # --> "I am a lua string"
     ];
-    thing4 = "couch is for scratching";
+    "]=====]-!'.thing4" = "couch is for scratching";
   };
 };
 generated = pkgs.writeText "nixgen.lua" ''return ${nixToLua.toLua yourNixValue}'';
