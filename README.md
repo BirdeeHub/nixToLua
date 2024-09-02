@@ -52,7 +52,7 @@ yourNixValue = {
         return a+b+c
       end)()
 
-    '';
+    ''; # --> this becomes the number 6 as you would expect when read from the table
   };
 };
 generated = pkgs.writeText "nixgen.lua" ''return ${nixToLua.toLua yourNixValue}'';
@@ -62,7 +62,7 @@ generated = pkgs.writeText "nixgen.lua" ''return ${nixToLua.toLua yourNixValue}'
 
 use toLua to convert nix to lua
 
-can convert nix to lua, EXCEPT FOR UNCALLED NIX FUNCTIONS.
+can convert any nix to lua, EXCEPT FOR UNCALLED NIX FUNCTIONS.
 
 ```nixToLua.mkLuaInline```
 
