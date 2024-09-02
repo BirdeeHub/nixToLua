@@ -52,6 +52,6 @@ can convert nix to lua, EXCEPT FOR UNCALLED NIX FUNCTIONS.
 
 use mkLuaInline to allow insertion of unescaped lua code.
 
-lua inline values cannot be interpolated into other nix strings.
+lua inline values **CANNOT** be interpolated into other nix strings.
 
-other nix strings CAN be interpolated into lua inline values.
+other nix strings **CAN** be interpolated into lua inline values.
