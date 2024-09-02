@@ -49,14 +49,16 @@ yourNixValue = {
         local b = 2
 
         local c = 3
-        return a+b+c
+        return { a+b+c, "${pkgs.lolcat}" }
       end)()
 
-    ''; # --> this becomes the number 6 as you would expect when read from the table
+    '';
   };
 };
 generated = pkgs.writeText "nixgen.lua" ''return ${nixToLua.toLua yourNixValue}'';
 ```
+
+## Functions
 
 ```nixToLua.toLua```
 
@@ -72,14 +74,27 @@ lua inline values **CANNOT** be interpolated into other nix strings.
 
 other nix strings **CAN** be interpolated into lua inline values.
 
-```nix
-nix repl --show-trace
-Welcome to Nix 2.18.5. Type :? for help.
+## Examples
 
-nix-repl> :lf .
-warning: Git tree '/home/birdee/Projects/nixToLua' is dirty
-Added 13 variables.
+runnable examples are in a subdirectory called "examples"
 
-nix-repl> toLua (import ./testVals.nix).yourNixValue
-"{ [ [[theBestCat]] ] = [[says meow!!]], [ [[theWorstCat]] ] = { [ [======[]=====]-!'.thing4]======] ] = [[couch is for scratching]], [ [[hmm]] ] = assert(loadstring([[return \n(function ()\n  local a = 1\n  local b = 2\n\n  local c = 3\n  return a+b+c\nend)()\n\n]]))(), [ [[thing'1]] ] = { [[MEOW]], [==[]]' ]=][=[HISSS]]\"[[]==] }, [ [[thing2]] ] = { { [ [[thing3]] ] = { [[give]], [[treat]] } }, [[I LOVE KEYBOARDS]], assert(loadstring([=[return [[I am a]] .. [[ lua ]] .. type(\"value\")]=]))(), [=====[multi line string\n       tstasddas\n       ddsdaa]====]\n]=====] } } }"
+```bash
+nix run --show-trace github:BirdeeHub/nixToLua?dir=examples
+```
+
+running the above command will output the inspect print of the
+lua table generated from the [examples/yourNixValue.nix](./examples/yourNixValue.nix) file.
+
+```lua
+{
+  theBestCat = "says meow!!",
+  theWorstCat = {
+    ["]=====]-!'.thing4"] = "couch is for scratching",
+    hmm = { 6, "/nix/store/h4fjrinvqsw97mnn31izx51lyn5dd1q6-lolcat-100.0.1" },
+    ["thing'1"] = { "MEOW", "]]' ]=][=[HISSS]]\"[[" },
+    thing2 = { {
+        thing3 = { "give", "treat" }
+      }, "I LOVE KEYBOARDS", "I am a lua string", "multi line string\n     tstasddas\n     ddsdaa]====]\n" }
+  }
+}
 ```
