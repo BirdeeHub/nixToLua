@@ -58,7 +58,7 @@ yourNixValue = {
 generated = pkgs.writeText "nixgen.lua" ''return ${nixToLua.toLua yourNixValue}'';
 ```
 
-## Functions
+## Translators
 
 ```nixToLua.toLua```
 
@@ -82,6 +82,8 @@ Same as `nixToLua.prettyLua` but does not modify multiline inputs.
 The output may look slightly less pretty, but it ensures your strings
 will not be modified from how they would have been parsed by nix,
 once read by lua.
+
+## Helpers
 
 ```nixToLua.mkLuaInline```
 
