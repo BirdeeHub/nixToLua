@@ -2,6 +2,8 @@ with builtins; rec {
   
   mkLuaInline = expr: { __type = "nix-to-lua-inline"; inherit expr; };
 
+  luaResult = LI: "assert(loadstring(${luaEnclose "return ${LI.expr}"}))()";
+
   toLua = toLuaInternal {};
 
   prettyLua = toLuaInternal { pretty = true; };
@@ -50,8 +52,6 @@ with builtins; rec {
       then toCheck.__type == "nix-to-lua-inline"
       else false;
 
-      luaToString = LI: "assert(loadstring(${luaEnclose "return ${LI.expr}"}))()";
-
       isDerivation = value: value.type or null == "derivation";
     in
       if value == true then "true"
@@ -59,7 +59,7 @@ with builtins; rec {
       else if value == null then "nil"
       else if isList value then "${luaListPrinter value level}"
       else if isDerivation value then luaEnclose "${value}"
-      else if isLuaInline value then replacer (luaToString value)
+      else if isLuaInline value then replacer (luaResult value)
       else if isAttrs value then "${luaTablePrinter value level}"
       else replacer (luaEnclose (toString value));
 

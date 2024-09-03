@@ -66,16 +66,6 @@ use toLua to convert nix to lua
 
 can convert any nix to lua, EXCEPT FOR UNCALLED NIX FUNCTIONS.
 
-```nixToLua.mkLuaInline```
-
-Use mkLuaInline to allow insertion of unescaped lua code.
-
-If you could put it as a value in a lua table, you could put it here.
-
-lua inline values **CANNOT** be interpolated into other nix strings.
-
-other nix strings **CAN** be interpolated into lua inline values.
-
 `nixToLua.prettyLua`
 
 Will format the lua output with proper indentation.
@@ -92,6 +82,25 @@ Same as `nixToLua.prettyLua` but does not modify multiline inputs.
 The output may look slightly less pretty, but it ensures your strings
 will not be modified from how they would have been parsed by nix,
 once read by lua.
+
+```nixToLua.mkLuaInline```
+
+Use mkLuaInline to allow insertion of unescaped lua code.
+
+If you could put it as a value in a lua table, you could put it here.
+
+lua inline values **CANNOT** be interpolated into other nix strings.
+
+other nix strings **CAN** be interpolated into lua inline values.
+
+`nixToLua.luaResult`
+
+If you REALLY must interpolate the result of a mkLuaInline value
+into another nix string within a converted table,
+you may use this function on the mkLuaInline value you created.
+
+Nesting like this multiple times may come at a performance cost in your lua,
+and should be avoided whenever possible.
 
 ## Examples
 
