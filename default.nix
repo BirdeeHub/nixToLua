@@ -2,7 +2,14 @@ with builtins; rec {
   
   mkLuaInline = expr: { __type = "nix-to-lua-inline"; inherit expr; };
 
-  luaResult = LI: "assert(loadstring(${luaEnclose "return ${LI.expr}"}))()";
+  isLuaInline = toCheck:
+  if isAttrs toCheck && toCheck ? __type
+  then toCheck.__type == "nix-to-lua-inline"
+  else false;
+
+  luaResult = LI: if isLuaInline LI then
+    "assert(loadstring(${luaEnclose "return ${LI.expr}"}))()"
+    else throw "argument to nixToLua.luaResult was not a lua inline expression";
 
   toLua = toLuaInternal {};
 
@@ -47,10 +54,7 @@ with builtins; rec {
     doSingleLuaValue = level: value: let
       replacer = str: if pretty && formatstrings then builtins.replaceStrings [ "\n" ] [ "${nl_spc level}" ] str else str;
 
-      isLuaInline = toCheck:
-      if isAttrs toCheck && toCheck ? __type
-      then toCheck.__type == "nix-to-lua-inline"
-      else false;
+      luaToStr = LI: "assert(loadstring(${luaEnclose "return ${LI.expr}"}))()";
 
       isDerivation = value: value.type or null == "derivation";
     in
@@ -59,7 +63,7 @@ with builtins; rec {
       else if value == null then "nil"
       else if isList value then "${luaListPrinter value level}"
       else if isDerivation value then luaEnclose "${value}"
-      else if isLuaInline value then replacer (luaResult value)
+      else if isLuaInline value then replacer (luaToStr value)
       else if isAttrs value then "${luaTablePrinter value level}"
       else replacer (luaEnclose (toString value));
 

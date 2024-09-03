@@ -102,6 +102,10 @@ you may use this function on the mkLuaInline value you created.
 Nesting like this multiple times may come at a performance cost in your lua,
 and should be avoided whenever possible.
 
+`nixToLua.isLuaInline`
+
+For when you need to check if a nix value is a lua inline value.
+
 ## Examples
 
 runnable examples are in a subdirectory called "examples"
