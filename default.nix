@@ -16,15 +16,6 @@ with builtins; rec {
     ...
   }: input: let
 
-    isLuaInline = toCheck:
-    if isAttrs toCheck && toCheck ? __type
-    then toCheck.__type == "nix-to-lua-inline"
-    else false;
-
-    luaToString = LI: "assert(loadstring(${luaEnclose "return ${LI.expr}"}))()";
-
-    isDerivation = value: value.type or null == "derivation";
-
     luaEnclose = inString: let
       genStr = str: num: concatStringsSep "" (genList (_: str) num);
 
@@ -53,6 +44,15 @@ with builtins; rec {
 
     doSingleLuaValue = level: value: let
       replacer = str: if pretty && formatstrings then builtins.replaceStrings [ "\n" ] [ "${nl_spc level}" ] str else str;
+
+      isLuaInline = toCheck:
+      if isAttrs toCheck && toCheck ? __type
+      then toCheck.__type == "nix-to-lua-inline"
+      else false;
+
+      luaToString = LI: "assert(loadstring(${luaEnclose "return ${LI.expr}"}))()";
+
+      isDerivation = value: value.type or null == "derivation";
     in
       if value == true then "true"
       else if value == false then "false"
