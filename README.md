@@ -136,5 +136,5 @@ lua table generated from the [examples/yourNixValue.nix](./examples/yourNixValue
 - extra examples:
 
 ```bash
-nix run --show-trace github:BirdeeHub/nixToLua?dir=examples\#anotherNixValue
+nix run --show-trace github:BirdeeHub/nixToLua?dir=examples#anotherNixValue
 ```
