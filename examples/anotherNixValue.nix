@@ -8,7 +8,7 @@
       echo "Hello World!"
     '';
     test2 = nixToLua.mkLuaInline /*lua*/''
-      require('inspect')({ "this", "is", "a", "test" })
+      require('inspect')({ os.date('%Y-%m-%d'), "this", "is", "a", "test" })
     '';
   };
   # you can call them in the table though!
