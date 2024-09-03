@@ -68,7 +68,9 @@ can convert any nix to lua, EXCEPT FOR UNCALLED NIX FUNCTIONS.
 
 ```nixToLua.mkLuaInline```
 
-use mkLuaInline to allow insertion of unescaped lua code.
+Use mkLuaInline to allow insertion of unescaped lua code.
+
+If you could put it as a value in a lua table, you could put it here.
 
 lua inline values **CANNOT** be interpolated into other nix strings.
 
