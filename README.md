@@ -76,6 +76,23 @@ lua inline values **CANNOT** be interpolated into other nix strings.
 
 other nix strings **CAN** be interpolated into lua inline values.
 
+`nixToLua.prettyLua`
+
+Will format the lua output with proper indentation.
+
+If there is a multiline string, it will align it,
+possibly altering spacing within the string itself.
+
+If the spacing matters, use the following function:
+
+`nixToLua.prettyNoModify`
+
+Same as `nixToLua.prettyLua` but does not modify multiline inputs.
+
+The output may look slightly less pretty, but it ensures your strings
+will not be modified from how they would have been parsed by nix,
+once read by lua.
+
 ## Examples
 
 runnable examples are in a subdirectory called "examples"
