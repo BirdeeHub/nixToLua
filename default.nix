@@ -19,15 +19,23 @@ with builtins; rec {
 
   toLuaInternal = {
     pretty ? false,
+    indentSize ? 2,
     # adds indenting to multiline strings
     # and multiline lua expressions
     formatstrings ? true, # <-- only active if pretty is true
     ...
   }: input: let
 
-    luaEnclose = inString: let
-      genStr = str: num: concatStringsSep "" (genList (_: str) num);
+    genStr = str: num: concatStringsSep "" (genList (_: str) num);
 
+    isLuaInline = toCheck:
+    if isAttrs toCheck && toCheck ? __type
+    then toCheck.__type == "nix-to-lua-inline"
+    else false;
+
+    luaToString = LI: "assert(loadstring(${luaEnclose "return ${LI.expr}"}))()";
+
+    luaEnclose = inString: let
       measureLongBois = inString: let
         normalize_split = list: filter (x: x != null && x != "")
             (concatMap (x: if isList x then x else [ ]) list);
@@ -46,49 +54,36 @@ with builtins; rec {
     in
     bL + inString + bR;
 
-    nl_spc = level: let
-      genStr = str: num: concatStringsSep "" (genList (_: str) num);
-    in
-    if pretty == true then "\n${genStr " " (level * 2)}" else " ";
+    nl_spc = level: if pretty == true
+      then "\n${genStr " " (level * indentSize)}" else " ";
 
     doSingleLuaValue = level: value: let
-      replacer = str: if pretty && formatstrings then builtins.replaceStrings [ "\n" ] [ "${nl_spc level}" ] str else str;
-
-      luaToStr = LI: "assert(loadstring(${luaEnclose "return ${LI.expr}"}))()";
-
+      replacer = str: if pretty && formatstrings then replaceStrings [ "\n" ] [ "${nl_spc level}" ] str else str;
       isDerivation = value: value.type or null == "derivation";
     in
       if value == true then "true"
       else if value == false then "false"
       else if value == null then "nil"
-      else if isList value then "${luaListPrinter value level}"
+      else if isList value then "${luaListPrinter level value}"
       else if isDerivation value then luaEnclose "${value}"
-      else if isLuaInline value then replacer (luaToStr value)
-      else if isAttrs value then "${luaTablePrinter value level}"
+      else if isLuaInline value then replacer (luaToString value)
+      else if isAttrs value then "${luaTablePrinter level value}"
       else replacer (luaEnclose (toString value));
 
-    luaTablePrinter = attrSet: level: let
-      luatableformatter = attrSet: let
-        nameandstringmap = mapAttrs (n: value: let
-            name = "[ " + (luaEnclose "${n}") + " ]";
-          in
-          "${name} = ${doSingleLuaValue (level + 1) value}") attrSet;
-        resultList = attrValues nameandstringmap;
-        resultString = concatStringsSep ",${nl_spc (level + 1)}" resultList;
+    luaTablePrinter = level: attrSet: let
+      nameandstringmap = mapAttrs (n: value: let
+        name = "[ " + (luaEnclose "${n}") + " ]";
       in
-      resultString;
-      catset = luatableformatter attrSet;
+        "${name} = ${doSingleLuaValue (level + 1) value}") attrSet;
+      resultList = attrValues nameandstringmap;
+      catset = concatStringsSep ",${nl_spc (level + 1)}" resultList;
       LuaTable = "{${nl_spc (level + 1)}" + catset + "${nl_spc level}}";
     in
     LuaTable;
 
-    luaListPrinter = theList: level: let
-      lualistformatter = theList: let
-        stringlist = map (doSingleLuaValue (level + 1)) theList;
-        resultString = concatStringsSep ",${nl_spc (level + 1)}" stringlist;
-      in
-      resultString;
-      catlist = lualistformatter theList;
+    luaListPrinter = level: theList: let
+      stringlist = map (doSingleLuaValue (level + 1)) theList;
+      catlist = concatStringsSep ",${nl_spc (level + 1)}" stringlist;
       LuaList = "{${nl_spc (level + 1)}" + catlist + "${nl_spc level}}";
     in
     LuaList;
