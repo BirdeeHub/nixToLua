@@ -23,10 +23,7 @@ with builtins; rec {
 
   mkLuaInline = expr: { __type = "nix-to-lua-inline"; inherit expr; };
 
-  isLuaInline = toCheck:
-  if isAttrs toCheck && toCheck ? __type
-  then toCheck.__type == "nix-to-lua-inline"
-  else false;
+  isLuaInline = toCheck: toCheck.__type or "" == "nix-to-lua-inline" && toCheck ? expr;
 
   luaResult = LI: if isLuaInline LI then
     "assert(loadstring(${luaEnclose "return ${LI.expr}"}))()"
