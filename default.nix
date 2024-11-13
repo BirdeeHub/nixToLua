@@ -1,6 +1,6 @@
 with builtins; rec {
   
-  mkLuaFileWithMeta = { translator, writeText, modname, table }:
+  mkLuaFileWithMeta = { translator, writeText }: modname: table:
     writeText "${modname}.lua" /*lua*/''
     local ${modname} = ${translator table};
     return setmetatable(${modname}, {
