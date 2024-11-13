@@ -3,12 +3,9 @@ with builtins; rec {
   mkLuaTableWithMeta = translator: table: # lua
     ''(function(tbl_in)
       return setmetatable(tbl_in, {
-        __call = function(_, ..., attrpath)
+        __call = function(_, attrpath)
           local strtable = {}
-          if select("#", ...) > 0 then
-              strtable = {...}
-              table.insert(strtable, attrpath)
-          elseif type(attrpath) == "table" then
+          if type(attrpath) == "table" then
               strtable = attrpath
           elseif type(attrpath) == "string" then
               for key in attrpath:gmatch("([^%.]+)") do
