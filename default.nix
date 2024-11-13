@@ -1,25 +1,34 @@
 with builtins; rec {
   
-  mkLuaFileWithMeta = { translator, writeText }: modname: table:
-    writeText "${modname}.lua" /*lua*/''
-    local ${modname} = ${translator table};
-    return setmetatable(${modname}, {
-      __call = function(self, attrpath)
-        local strtable = {}
-        if type(attrpath) == "table" then
-            strtable = attrpath
-        elseif type(attrpath) == "string" then
-            for key in attrpath:gmatch("([^%.]+)") do
-                table.insert(strtable, key)
+  mkLuaTableWithMeta = translator: table: # lua
+    ''(function(tbl_in)
+      return setmetatable(tbl_in, {
+        __call = function(_, ..., attrpath)
+          local strtable = {}
+          if select("#", ...) > 0 then
+              strtable = {...}
+              table.insert(strtable, attrpath)
+          elseif type(attrpath) == "table" then
+              strtable = attrpath
+          elseif type(attrpath) == "string" then
+              for key in attrpath:gmatch("([^%.]+)") do
+                  table.insert(strtable, key)
+              end
+          else
+              print("function requires a table of strings or a dot separated string")
+              return
+          end
+          local tbl = tbl_in
+          for _, key in ipairs(strtable) do
+            if type(tbl) ~= "table" then
+              return nil
             end
-        else
-            print("function requires a table of strings or a dot separated string")
-            return
+            tbl = tbl[key]
+          end
+          return tbl
         end
-        return vim.tbl_get(${modname}, unpack(strtable));
-      end
-    })
-  '';
+      })
+    end)(${translator table})'';
 
   mkLuaInline = expr: { __type = "nix-to-lua-inline"; inherit expr; };
 
