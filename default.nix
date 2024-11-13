@@ -18,9 +18,7 @@ with builtins; rec {
           if #strtable == 0 then return nil end
           local tbl = tbl_in
           for _, key in ipairs(strtable) do
-            if type(tbl) ~= "table" then
-              return nil
-            end
+            if type(tbl) ~= "table" then return nil end
             tbl = tbl[key]
           end
           return tbl
