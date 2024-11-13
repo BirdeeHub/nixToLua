@@ -15,6 +15,7 @@ with builtins; rec {
               print("function requires a table of strings or a dot separated string")
               return
           end
+          if #strtable == 0 then return nil end
           local tbl = tbl_in
           for _, key in ipairs(strtable) do
             if type(tbl) ~= "table" then
