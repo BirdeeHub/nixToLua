@@ -1,5 +1,26 @@
 with builtins; rec {
   
+  mkLuaFileWithMeta = { translator, writeText, modname, table }:
+    writeText "${modname}.lua" /*lua*/''
+    local ${modname} = ${translator table};
+    return setmetatable(${modname}, {
+      __call = function(self, attrpath)
+        local strtable = {}
+        if type(attrpath) == "table" then
+            strtable = attrpath
+        elseif type(attrpath) == "string" then
+            for key in attrpath:gmatch("([^%.]+)") do
+                table.insert(strtable, key)
+            end
+        else
+            print("function requires a table of strings or a dot separated string")
+            return
+        end
+        return vim.tbl_get(${modname}, unpack(strtable));
+      end
+    })
+  '';
+
   mkLuaInline = expr: { __type = "nix-to-lua-inline"; inherit expr; };
 
   isLuaInline = toCheck:
