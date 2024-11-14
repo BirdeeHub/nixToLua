@@ -127,43 +127,6 @@ in rec {
   in
   doSingleLuaValue 0 input;
 
-  mkTableWithMeta = translator: meta: table: let
-    tbl_var = "tbl_in";
-    metapre = meta tbl_var;
-    metas = if isList metapre
-      then ''${translator (head metapre)}, ${translator (elemAt tblvar 1)}''
-      else ''${tbl_var}, ${translator metapre}'';
-  in # lua
-    ''(function(${tbl_var}) return setmetatable(${metas}) end)(${translator table})'';
-
-  mkTableWithAccessor = translator: table: let
-    meta = tbl_var: {
-      __call = inline.types.function-safe.mk {
-        args = [ "_" "attrpath" ];
-        body = /*lua*/''
-          local strtable = {}
-          if type(attrpath) == "table" then
-              strtable = attrpath
-          elseif type(attrpath) == "string" then
-              for key in attrpath:gmatch("([^%.]+)") do
-                  table.insert(strtable, key)
-              end
-          else
-              print("function requires a table of strings or a dot separated string")
-              return
-          end
-          if #strtable == 0 then return nil end
-          local tbl = ${tbl_var};
-          for _, key in ipairs(strtable) do
-            if type(tbl) ~= "table" then return nil end
-            tbl = tbl[key]
-          end
-          return tbl
-        '';
-      };
-    };
-  in mkTableWithMeta translator meta table;
-
   prettyNoModify = trace "prettyNoModify renamed to toLua" toLua;
 
   toLuaInternal = trace "toLuaInternal renamed to toLuaFull" toLuaFull;
