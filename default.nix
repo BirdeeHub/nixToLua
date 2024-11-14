@@ -1,77 +1,91 @@
-with builtins; rec {
-  
-  mkLuaTableWithMeta = translator: table: # lua
-    ''(function(tbl_in)
-      return setmetatable(tbl_in, {
-        __call = function(_, attrpath)
-          local strtable = {}
-          if type(attrpath) == "table" then
-              strtable = attrpath
-          elseif type(attrpath) == "string" then
-              for key in attrpath:gmatch("([^%.]+)") do
-                  table.insert(strtable, key)
-              end
-          else
-              print("function requires a table of strings or a dot separated string")
-              return
-          end
-          if #strtable == 0 then return nil end
-          local tbl = tbl_in
-          for _, key in ipairs(strtable) do
-            if type(tbl) ~= "table" then return nil end
-            tbl = tbl[key]
-          end
-          return tbl
-        end
-      })
-    end)(${translator table})'';
+with builtins; let
+  genStr = str: num: concatStringsSep "" (genList (_: str) num);
+  luaEnclose = inString: let
+    measureLongBois = inString: let
+      normalize_split = list: filter (x: x != null && x != "")
+          (concatMap (x: if isList x then x else [ ]) list);
+      splitter = str: normalize_split (split "(\\[=*\\[)|(]=*])" str);
+      counter = str: map stringLength (splitter str);
+      getMax = str: foldl' (max: x: if x > max then x else max) 0 (counter str);
+      getEqSigns = str: (getMax str) - 2;
+      longBoiLength = getEqSigns inString;
+    in
+    if longBoiLength >= 0 then longBoiLength + 1 else 0;
 
-  mkLuaInline = expr: { __type = "nix-to-lua-inline"; inherit expr; };
+    eqNum = measureLongBois inString;
+    eqStr = genStr "=" eqNum;
+    bL = "[" + eqStr + "[";
+    bR = "]" + eqStr + "]";
+  in
+  bL + inString + bR;
 
-  isLuaInline = toCheck: toCheck.__type or "" == "nix-to-lua-inline" && toCheck ? expr;
+  mkEnum = id: proto: let
+    filterAttrs = pred: set:
+      removeAttrs set (filter (name: ! pred name set.${name}) (attrNames set));
+    mkBaseT = expr: { __type = id; inherit expr; };
+    mkmk = n: p: default: v: mkBaseT ((p.fields or {}) // { type = n; } // default v);
+    types = mapAttrs (n: p: p // { name = n; mk = mkmk n p (p.default or (o: o)); }) proto;
+    default_subtype = let
+      defvals = attrNames (filterAttrs (n: x: isFunction (x.default or false)) proto);
+      valdef = if defvals == [] then throw "no default type specified"
+        else if length defvals  == 1 then head defvals
+        else throw "multiple default types specified";
+    in valdef;
+    member = v: (v.__type or null == id && v ? expr) && null != types."${v.expr.type or default_subtype}".name or null;
+    typeof = v: let
+      in if ! (member v) then null
+      else types."${v.expr.type or default_subtype}".name;
+    resolve = v: let vt = typeof v; in
+      if vt == null then throw "unable to resolve, not subtype of ${id}"
+      else (proto."${vt}".format or (o: o.expr)) v;
+  in { inherit types typeof member resolve mkBaseT id; };
 
-  luaResult = LI: if isLuaInline LI then
-    "assert(loadstring(${luaEnclose "return ${LI.expr}"}))()"
-    else throw "argument to nixToLua.luaResult was not a lua inline expression";
+  LIproto = let
+    fixargs = LI: if any (v: ! isString v || builtins.match ''^([A-Za-z_][A-Za-z0-9_]*|\.\.\.)$'' v == null) (LI.expr.args or [])
+      then throw "args must be valid lua identifiers"
+      else concatStringsSep ", " (LI.expr.args or []);
+  in {
+    inline-safe = {
+      default = (v: if v ? body then v else { body = v; });
+      fields = { body = ""; };
+      format = LI: "assert(loadstring(${luaEnclose "return ${LI.expr.body or LI.expr or "nil"}"}))()";
+    };
+    inline-unsafe = {
+      fields = { body = ""; };
+      format = LI: "${LI.expr.body or "nil"}";
+    };
+    function-safe = {
+      fields = { body = ""; args = []; };
+      format = LI: ''(function(${fixargs (LI.expr.args or [])})
+        return assert(loadstring(${luaEnclose "${LI.expr.body or "return nil"}"}))()
+      end)'';
+    };
+    function-unsafe = {
+      fields = { body = ""; args = []; };
+      format = LI: ''(function(${fixargs (LI.expr.args or [])})
+        ${LI.expr.body or "return nil"}
+      end)'';
+    };
+  };
 
-  toLua = toLuaInternal {};
+in rec {
 
-  prettyLua = toLuaInternal { pretty = true; };
+  toLua = toLuaFull {};
 
-  prettyNoModify = toLuaInternal { pretty = true; formatstrings = false; };
+  prettyLua = toLuaFull { pretty = true; formatstrings = true; };
 
-  toLuaInternal = {
-    pretty ? false,
+  uglyLua = toLuaFull { pretty = false; formatstrings = false; };
+
+  inline = mkEnum "nix-to-lua-inline" LIproto;
+
+  toLuaFull = {
+    pretty ? true,
     indentSize ? 2,
     # adds indenting to multiline strings
     # and multiline lua expressions
-    formatstrings ? true, # <-- only active if pretty is true
+    formatstrings ? false, # <-- only active if pretty is true
     ...
   }: input: let
-
-    genStr = str: num: concatStringsSep "" (genList (_: str) num);
-
-    luaToString = LI: "assert(loadstring(${luaEnclose "return ${LI.expr}"}))()";
-
-    luaEnclose = inString: let
-      measureLongBois = inString: let
-        normalize_split = list: filter (x: x != null && x != "")
-            (concatMap (x: if isList x then x else [ ]) list);
-        splitter = str: normalize_split (split "(\\[=*\\[)|(]=*])" str);
-        counter = str: map stringLength (splitter str);
-        getMax = str: foldl' (max: x: if x > max then x else max) 0 (counter str);
-        getEqSigns = str: (getMax str) - 2;
-        longBoiLength = getEqSigns inString;
-      in
-      if longBoiLength >= 0 then longBoiLength + 1 else 0;
-
-      eqNum = measureLongBois inString;
-      eqStr = genStr "=" eqNum;
-      bL = "[" + eqStr + "[";
-      bR = "]" + eqStr + "]";
-    in
-    bL + inString + bR;
-
     nl_spc = level: if pretty == true
       then "\n${genStr " " (level * indentSize)}" else " ";
 
@@ -84,7 +98,7 @@ with builtins; rec {
       else if value == null then "nil"
       else if isFloat value || isInt value then toString value
       else if isList value then "${luaListPrinter level value}"
-      else if isLuaInline value then replacer (luaToString value)
+      else if inline.member value then replacer (inline.resolve value)
       else if value ? outPath then luaEnclose "${value.outPath}"
       else if isDerivation value then luaEnclose "${value}"
       else if isAttrs value then "${luaTablePrinter level value}"
@@ -111,4 +125,51 @@ with builtins; rec {
   in
   doSingleLuaValue 0 input;
 
+  mkTableWithMeta = translator: meta: table: let
+    tbl_var = "tbl_in";
+    metapre = meta tbl_var;
+    metas = if isList metapre
+      then ''${translator (head metapre)}, ${translator (elemAt tblvar 1)}''
+      else ''${tbl_var}, ${translator metapre}'';
+  in # lua
+    ''(function(${tbl_var}) return setmetatable(${metas}) end)(${translator table})'';
+
+  mkTableWithAccessor = translator: table: let
+    meta = tbl_var: {
+      __call = mkLuaInline {
+        type = inline.types.function-safe;
+        args = [ "_" "attrpath" ];
+        body = /*lua*/''
+          local strtable = {}
+          if type(attrpath) == "table" then
+              strtable = attrpath
+          elseif type(attrpath) == "string" then
+              for key in attrpath:gmatch("([^%.]+)") do
+                  table.insert(strtable, key)
+              end
+          else
+              print("function requires a table of strings or a dot separated string")
+              return
+          end
+          if #strtable == 0 then return nil end
+          local tbl = ${tbl_var};
+          for _, key in ipairs(strtable) do
+            if type(tbl) ~= "table" then return nil end
+            tbl = tbl[key]
+          end
+          return tbl
+        '';
+      };
+    };
+  in mkTableWithMeta translator meta table;
+
+  prettyNoModify = trace "prettyNoModify renamed to toLua" toLua;
+
+  toLuaInternal = trace "toLuaInternal renamed to toLuaFull" toLuaFull;
+
+  mkLuaInline = trace "mkLuaInline renamed to inline.mkBaseT" inline.mkBaseT;
+
+  isLuaInline = trace "mkLuaInline renamed to inline.member" inline.member;
+
+  luaResult = trace "luaResult renamed to inline.resolve" inline.resolve;
 }

@@ -15,7 +15,7 @@
         import_table = (import "${path}" { inherit pkgs luaEnv nixToLua; });
         luaFile = pkgs.writeText "${name}.lua" /*lua*/''
           local inspect = require 'inspect'
-          print(inspect(${nixToLua.prettyNoModify import_table}))
+          print(inspect(${nixToLua.toLua import_table}))
         '';
       in /*bash*/''
         ${luaEnv}/bin/lua ${luaFile}

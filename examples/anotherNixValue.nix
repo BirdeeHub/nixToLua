@@ -7,7 +7,7 @@
     test = pkgs.writeShellScriptBin "ImaScript" ''
       echo "Hello World!"
     '';
-    test2 = nixToLua.mkLuaInline /*lua*/''
+    test2 = nixToLua.inline.types.inline-safe.mk /*lua*/''
       require('inspect')({ os.date('%Y-%m-%d'), "this", "is", "a", "test" })
     '';
   };
@@ -25,7 +25,7 @@ rec {
   nix_doesnt_allow_this_though = "yes this also works";
   yes_this_also_works = functions pkgs;
   "this is fine though" = yes_this_also_works;
-  hmm = nixToLua.mkLuaInline /*lua*/ ''
+  hmm = nixToLua.inline.types.inline-safe.mk /*lua*/ ''
     {
       PKG_LOADED = package.loaded,
       PKG_PATH = package.path,

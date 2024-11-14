@@ -60,53 +60,38 @@ generated = pkgs.writeText "nixgen.lua" ''return ${nixToLua.toLua yourNixValue}'
 
 ## Translators
 
-```nixToLua.toLua```
-
-use toLua to convert nix to lua
-
-can convert any nix to lua, EXCEPT FOR UNCALLED NIX FUNCTIONS.
-
-`nixToLua.prettyLua`
+`nixToLua.toLua`
 
 Will format the lua output with proper indentation.
 
-If there is a multiline string, it will align it,
-possibly altering spacing within the string itself.
-
-If the spacing matters, use the following function:
-
-`nixToLua.prettyNoModify`
-
-Same as `nixToLua.prettyLua` but does not modify multiline inputs.
+Will avoid modifying indentation on multiline inputs.
 
 The output may look slightly less pretty, but it ensures your strings
 will not be modified from how they would have been parsed by nix,
 once read by lua.
 
+`nixToLua.prettyLua`
+
+Will format the lua output with proper indentation.
+
+Same as `nixToLua.toLua` except will realign multiline inputs.
+
+If there is a multiline string, it will align it,
+possibly altering spacing within the string itself.
+
+If the spacing within the input matters, use the above function.
+
+```nixToLua.uglyLua```
+
+use toLua to convert nix to lua, all 1 line
+
+can convert any nix to lua, EXCEPT FOR UNCALLED NIX FUNCTIONS.
+
 ## Helpers
 
-```nixToLua.mkLuaInline```
+TODO: fill this out with the new scheme
 
-Use mkLuaInline to allow insertion of unescaped lua code.
-
-If you could put it as a value in a lua table, you could put it here.
-
-lua inline values **CANNOT** be interpolated into other nix strings.
-
-other nix strings **CAN** be interpolated into lua inline values.
-
-`nixToLua.luaResult`
-
-If you REALLY must interpolate the result of a mkLuaInline value
-into another nix string within a converted table,
-you may use this function on the mkLuaInline value you created.
-
-Nesting like this multiple times may come at a performance cost in your lua,
-and should be avoided whenever possible.
-
-`nixToLua.isLuaInline`
-
-For when you need to check if a nix value is a lua inline value.
+For now, go look at the examples.
 
 ## Examples
 
