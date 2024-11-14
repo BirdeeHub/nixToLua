@@ -38,7 +38,7 @@ with builtins; let
     resolve = v: let vt = typeof v; in
       if vt == null then throw "unable to resolve, not subtype of ${id}"
       else (proto."${vt}".format or (o: o.expr)) v;
-  in { inherit types typeof member resolve mkBaseT id; };
+  in { inherit types typeof member resolve mkBaseT id default_subtype; };
 
   LIproto = let
     fixargs = LI: if any (v: ! isString v || builtins.match ''^([A-Za-z_][A-Za-z0-9_]*|\.\.\.)$'' v == null) (LI.expr.args or [])
