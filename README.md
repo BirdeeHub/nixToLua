@@ -3,20 +3,20 @@
 this repo does not need to be imported as a flake, but is able to be.
 
 ```nix
-inputs.nixToLua.url = "github:BirdeeHub/nixToLua";
-outputs = { nixToLua, ... }: {
+inputs.n2l.url = "github:BirdeeHub/nixToLua";
+outputs = { n2l, ... }: {
 };
 ```
 
 - or
 
 ```nix
-inputs.nixToLuaNonFlake = {
+inputs.nixToLua = {
   url = "github:BirdeeHub/nixToLua";
   flake = false;
 };
-outputs.nixToLua = { nixToLuaNonFlake, ... }: {
-  nixToLua = import nixToLuaNonFlake;
+outputs = { nixToLua, ... }: {
+  n2l = import nixToLuaNonFlake;
 };
 # or any other way you can fetch it and call import on it
 ```
@@ -24,8 +24,7 @@ outputs.nixToLua = { nixToLuaNonFlake, ... }: {
 ## Useage:
 
 ```nix
-
-yourNixValue = {
+{ pkgs, nixToLua, luaEnv, ... }: {
   theBestCat = "says meow!!";
   # yes even tortured inputs work.
   theWorstCat = {
@@ -35,27 +34,42 @@ yourNixValue = {
         thing3 = [ "give" "treat" ];
       }
       "I LOVE KEYBOARDS"
-      (nixToLua.mkLuaInline ''[[I am a]] .. [[ lua ]] .. type("value")'') # --> "I am a lua string"
+      (nixToLua.inline.types.inline-unsafe.mk { body = ''[[I am a]] .. [[ lua ]] .. type("value")''; }) # --> "I am a lua string"
       '' multi line string
       tstasddas
       ddsdaa]====]
       ''
+      (nixToLua.inline.types.inline-safe.mk ''[[I am at ]] .. os.getenv("HOME") or "home?" .. " here!!"'')
     ];
     "]=====]-!'.thing4" = "couch is for scratching";
-    hmm = nixToLua.mkLuaInline /*lua*/ ''
+    hmm = nixToLua.inline.types.inline-safe.mk { body = /*lua*/ ''
 
-      (function ()
-        local a = 1
-        local b = 2
+        (function ()
+          local a = 1
+          local b = 2
 
-        local c = 3
-        return { a+b+c, "${pkgs.lolcat}" }
-      end)()
+          local c = 3
+          return { a+b+c, "${pkgs.lolcat}" }
+        end)()
 
-    '';
+      '';
+    };
+    directmaybe = nixToLua.inline.types.function-safe.mk {
+      args = [ "hello" ];
+      body = /*lua*/ ''
+        print(hello)
+      '';
+    };
+    directmaybe42 = nixToLua.inline.types.function-unsafe.mk {
+      args = [ "hi" "hello" ];
+      body = /*lua*/ ''
+        print(hi)
+        print(hello)
+      '';
+    };
+
   };
-};
-generated = pkgs.writeText "nixgen.lua" ''return ${nixToLua.toLua yourNixValue}'';
+}
 ```
 
 ## Translators
@@ -109,11 +123,13 @@ lua table generated from the [examples/yourNixValue.nix](./examples/yourNixValue
   theBestCat = "says meow!!",
   theWorstCat = {
     ["]=====]-!'.thing4"] = "couch is for scratching",
+    directmaybe = <function 1>,
+    directmaybe42 = <function 2>,
     hmm = { 6, "/nix/store/h4fjrinvqsw97mnn31izx51lyn5dd1q6-lolcat-100.0.1" },
     ["thing'1"] = { "MEOW", "]]' ]=][=[HISSS]]\"[[" },
     thing2 = { {
         thing3 = { "give", "treat" }
-      }, "I LOVE KEYBOARDS", "I am a lua string", "multi line string\n     tstasddas\n     ddsdaa]====]\n" }
+      }, "I LOVE KEYBOARDS", "I am a lua string", "multi line string\n     tstasddas\n     ddsdaa]====]\n", "I am at /home/birdee" }
   }
 }
 ```
