@@ -134,7 +134,7 @@ in rec {
 
   mkLuaInline = trace "mkLuaInline renamed to inline.mkBaseT" inline.mkBaseT;
 
-  isLuaInline = trace "mkLuaInline renamed to inline.member" inline.member;
+  isLuaInline = trace "isLuaInline renamed to inline.member" inline.member;
 
   luaResult = trace "luaResult renamed to inline.resolve" inline.resolve;
 }
