@@ -3,20 +3,20 @@
 this repo does not need to be imported as a flake, but is able to be.
 
 ```nix
-inputs.n2l.url = "github:BirdeeHub/nixToLua";
-outputs = { n2l, ... }: {
+inputs.nixToLua.url = "github:BirdeeHub/nixToLua";
+outputs = { nixToLua, ... }: {
 };
 ```
 
 - or
 
 ```nix
-inputs.nixToLua = {
+inputs.nixToLuaNonFlake = {
   url = "github:BirdeeHub/nixToLua";
   flake = false;
 };
-outputs = { nixToLua, ... }: {
-  n2l = import nixToLuaNonFlake;
+outputs = { nixToLuaNonFlake, ... }: {
+  nixToLua = import nixToLuaNonFlake;
 };
 # or any other way you can fetch it and call import on it
 ```
@@ -34,15 +34,15 @@ outputs = { nixToLua, ... }: {
         thing3 = [ "give" "treat" ];
       }
       "I LOVE KEYBOARDS"
-      (nixToLua.inline.types.inline-unsafe.mk { body = ''[[I am a]] .. [[ lua ]] .. type("value")''; }) # --> "I am a lua string"
+      (nixToLua.types.inline-unsafe.mk { body = ''[[I am a]] .. [[ lua ]] .. type("value")''; }) # --> "I am a lua string"
       '' multi line string
       tstasddas
       ddsdaa]====]
       ''
-      (nixToLua.inline.types.inline-safe.mk ''[[I am at ]] .. os.getenv("HOME") or "home?" .. " here!!"'')
+      (nixToLua.types.inline-safe.mk ''[[I am at ]] .. os.getenv("HOME") or "home?" .. " here!!"'')
     ];
     "]=====]-!'.thing4" = "couch is for scratching";
-    hmm = nixToLua.inline.types.inline-safe.mk { body = /*lua*/ ''
+    hmm = nixToLua.types.inline-safe.mk { body = /*lua*/ ''
 
         (function ()
           local a = 1
@@ -54,13 +54,13 @@ outputs = { nixToLua, ... }: {
 
       '';
     };
-    directmaybe = nixToLua.inline.types.function-safe.mk {
+    directmaybe = nixToLua.types.function-safe.mk {
       args = [ "hello" ];
       body = /*lua*/ ''
         print(hello)
       '';
     };
-    directmaybe42 = nixToLua.inline.types.function-unsafe.mk {
+    directmaybe42 = nixToLua.types.function-unsafe.mk {
       args = [ "hi" "hello" ];
       body = /*lua*/ ''
         print(hi)
