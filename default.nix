@@ -78,7 +78,8 @@ in rec {
 
   uglyLua = toLuaFull { pretty = false; formatstrings = false; };
 
-  inherit inline mkEnum;
+  inherit mkEnum inline;
+  inherit (inline) types typeof member resolve default_subtype;
 
   toLuaFull = {
     pretty ? true,
