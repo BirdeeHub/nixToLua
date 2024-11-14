@@ -68,6 +68,8 @@ with builtins; let
     };
   };
 
+  inline = mkEnum "nix-to-lua-inline" LIproto;
+
 in rec {
 
   toLua = toLuaFull {};
@@ -76,7 +78,7 @@ in rec {
 
   uglyLua = toLuaFull { pretty = false; formatstrings = false; };
 
-  inline = mkEnum "nix-to-lua-inline" LIproto;
+  inherit inline mkEnum;
 
   toLuaFull = {
     pretty ? true,
