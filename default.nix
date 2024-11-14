@@ -136,8 +136,7 @@ in rec {
 
   mkTableWithAccessor = translator: table: let
     meta = tbl_var: {
-      __call = mkLuaInline {
-        type = inline.types.function-safe;
+      __call = inline.types.function-safe.mk {
         args = [ "_" "attrpath" ];
         body = /*lua*/''
           local strtable = {}
