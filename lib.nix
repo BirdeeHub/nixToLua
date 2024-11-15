@@ -147,13 +147,4 @@ in {
   inherit mkEnum inline toLuaFull;
   inherit (inline) types typeof member resolve default_subtype;
 
-  prettyNoModify = trace "prettyNoModify renamed to toLua" (toLuaFull {});
-
-  toLuaInternal = trace "toLuaInternal renamed to toLuaFull" toLuaFull;
-
-  mkLuaInline = trace "mkLuaInline renamed to inline.mkBaseT" inline.mkBaseT;
-
-  isLuaInline = trace "isLuaInline renamed to inline.member" inline.member;
-
-  luaResult = trace "luaResult renamed to inline.resolve" inline.resolve;
 }
