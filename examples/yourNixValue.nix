@@ -82,5 +82,7 @@
   funcResults = {
     test1 = nixToLua.inline.types.inline-safe.mk ''${nixToLua.resolve theWorstCat.exampleSafeFunc}("Hello World!")'';
     test2 = nixToLua.inline.types.inline-safe.mk ''${nixToLua.resolve theWorstCat.exampleUnsafeFunc}("Hello World!", "and again!")'';
+    checkaval = nixToLua.inline.types.function-safe.check theWorstCat.exampleSafeFunc;
+    checkaval2 = nixToLua.inline.types.function-safe.check theWorstCat.exampleUnsafeFunc;
   };
 }
