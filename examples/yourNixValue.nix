@@ -1,4 +1,4 @@
-{ pkgs, nixToLua, luaEnv, ... }: {
+{ pkgs, nixToLua, luaEnv, ... }: rec {
   theBestCat = "says meow!!";
   # yes even tortured inputs work.
   theWorstCat = {
@@ -41,6 +41,9 @@
         print(hello)
       '';
     };
-
+  };
+  funcResults = {
+    test1 = nixToLua.inline.types.inline-safe.mk ''${nixToLua.resolve theWorstCat.directmaybe}("Hello World!")'';
+    test2 = nixToLua.inline.types.inline-safe.mk ''${nixToLua.resolve theWorstCat.directmaybe42}("Hello World!", "and again!")'';
   };
 }
