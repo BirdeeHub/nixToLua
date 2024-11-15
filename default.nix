@@ -41,9 +41,9 @@ with builtins; let
   in { inherit types typeof member resolve mkBaseT id default_subtype; };
 
   LIproto = let
-    fixargs = LI: if all (v: isString v || builtins.match ''^([A-Za-z_][A-Za-z0-9_]*|\.\.\.)$'' v != null) (LI.expr.args or [])
-      then concatStringsSep ", " (LI.expr.args or [])
-      else throw "args must be valid lua identifiers";
+    fixargs = LI: if any (v: ! isString v || builtins.match ''^([A-Za-z_][A-Za-z0-9_]*|\.\.\.)$'' v == null) (LI.expr.args or [])
+      then throw "args must be valid lua identifiers"
+      else concatStringsSep ", " (LI.expr.args or []);
   in {
     inline-safe = {
       default = (v: if v ? body then v else { body = v; });
