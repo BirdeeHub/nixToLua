@@ -144,7 +144,7 @@ in {
   inherit mkEnum inline toLuaFull;
   inherit (inline) types typeof member resolve default_subtype;
 
-  prettyNoModify = trace "prettyNoModify renamed to toLua" toLua;
+  prettyNoModify = trace "prettyNoModify renamed to toLua" (toLuaFull {});
 
   toLuaInternal = trace "toLuaInternal renamed to toLuaFull" toLuaFull;
 
