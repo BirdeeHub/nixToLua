@@ -75,7 +75,7 @@ extraTypes: with builtins; let
         metaarg1 = if LI.expr.newtable or null == null then LI.expr.tablevar or "{}" else toLuaFull opts LI.expr.newtable;
         result = inline.types.function-unsafe.mk {
           args = [ (LI.expr.tablevar or "tbl_in") ];
-          body = ''return setmetatable(${metaarg1},${toLuaFull opts LI.expr.meta})'';
+          body = ''return setmetatable(${metaarg1}, ${toLuaFull opts LI.expr.meta})'';
         };
       in "${toLuaFull opts result}(${toLuaFull opts LI.expr.table})";
     };
