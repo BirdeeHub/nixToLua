@@ -67,17 +67,15 @@ extraTypes: with builtins; let
     with-meta = {
       fields = {
         table = {};
-        meta = {
-          meta = {};
-          newtable = null; # <- if you want to specify a different first arg to setmetatable
-          tablevar = "tbl_in"; # <- varname to refer to the table, to avoid translating multiple times
-        };
+        meta = {};
+        newtable = null; # <- if you want to specify a different first arg to setmetatable
+        tablevar = "tbl_in"; # <- varname to refer to the table, to avoid translating multiple times
       };
       format = LI: opts: let
-        metaarg1 = if LI.expr.meta.newtable or null == null then LI.expr.meta.tablevar or "{}" else toLuaFull opts LI.expr.meta.newtable;
+        metaarg1 = if LI.expr.newtable or null == null then LI.expr.tablevar or "{}" else toLuaFull opts LI.expr.newtable;
         result = inline.types.function-unsafe.mk {
-          args = [ (LI.expr.meta.tablevar or "tbl_in") ];
-          body = ''return setmetatable(${metaarg1},${toLuaFull opts LI.expr.meta.meta})'';
+          args = [ (LI.expr.tablevar or "tbl_in") ];
+          body = ''return setmetatable(${metaarg1},${toLuaFull opts LI.expr.meta})'';
         };
       in "${toLuaFull opts result}(${toLuaFull opts LI.expr.table})";
     };
