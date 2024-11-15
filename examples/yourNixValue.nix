@@ -28,22 +28,24 @@
 
       '';
     };
-    directmaybe = nixToLua.inline.types.function-safe.mk {
+    exampleSafeFunc = nixToLua.inline.types.function-safe.mk {
       args = [ "hello" ];
       body = /*lua*/ ''
         print(hello)
+        return hello
       '';
     };
-    directmaybe42 = nixToLua.inline.types.function-unsafe.mk {
+    exampleUnsafeFunc = nixToLua.inline.types.function-unsafe.mk {
       args = [ "hi" "hello" ];
       body = /*lua*/ ''
         print(hi)
         print(hello)
+        return hi .. hello
       '';
     };
   };
   funcResults = {
-    test1 = nixToLua.inline.types.inline-safe.mk ''${nixToLua.resolve theWorstCat.directmaybe}("Hello World!")'';
-    test2 = nixToLua.inline.types.inline-safe.mk ''${nixToLua.resolve theWorstCat.directmaybe42}("Hello World!", "and again!")'';
+    test1 = nixToLua.inline.types.inline-safe.mk ''${nixToLua.resolve theWorstCat.exampleSafeFunc}("Hello World!")'';
+    test2 = nixToLua.inline.types.inline-safe.mk ''${nixToLua.resolve theWorstCat.exampleUnsafeFunc}("Hello World!", "and again!")'';
   };
 }

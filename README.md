@@ -24,7 +24,7 @@ outputs = { nixToLuaNonFlake, ... }: {
 ## Useage:
 
 ```nix
-{ pkgs, nixToLua, luaEnv, ... }: {
+{ pkgs, nixToLua, ... }: rec {
   theBestCat = "says meow!!";
   # yes even tortured inputs work.
   theWorstCat = {
@@ -34,15 +34,15 @@ outputs = { nixToLuaNonFlake, ... }: {
         thing3 = [ "give" "treat" ];
       }
       "I LOVE KEYBOARDS"
-      (nixToLua.types.inline-unsafe.mk { body = ''[[I am a]] .. [[ lua ]] .. type("value")''; }) # --> "I am a lua string"
+      (nixToLua.inline.types.inline-unsafe.mk { body = ''[[I am a]] .. [[ lua ]] .. type("value")''; }) # --> "I am a lua string"
       '' multi line string
       tstasddas
       ddsdaa]====]
       ''
-      (nixToLua.types.inline-safe.mk ''[[I am at ]] .. os.getenv("HOME") or "home?" .. " here!!"'')
+      (nixToLua.inline.types.inline-safe.mk ''[[I am at ]] .. os.getenv("HOME") or "home?" .. " here!!"'')
     ];
     "]=====]-!'.thing4" = "couch is for scratching";
-    hmm = nixToLua.types.inline-safe.mk { body = /*lua*/ ''
+    hmm = nixToLua.inline.types.inline-safe.mk { body = /*lua*/ ''
 
         (function ()
           local a = 1
@@ -54,23 +54,27 @@ outputs = { nixToLuaNonFlake, ... }: {
 
       '';
     };
-    directmaybe = nixToLua.types.function-safe.mk {
+    exampleSafeFunc = nixToLua.inline.types.function-safe.mk {
       args = [ "hello" ];
       body = /*lua*/ ''
         print(hello)
+        return hello
       '';
     };
-    directmaybe42 = nixToLua.types.function-unsafe.mk {
+    exampleUnsafeFunc = nixToLua.inline.types.function-unsafe.mk {
       args = [ "hi" "hello" ];
       body = /*lua*/ ''
         print(hi)
         print(hello)
+        return hi .. hello
       '';
     };
-
   };
-}
-```
+  funcResults = {
+    test1 = nixToLua.inline.types.inline-safe.mk ''${nixToLua.resolve theWorstCat.exampleSafeFunc}("Hello World!")'';
+    test2 = nixToLua.inline.types.inline-safe.mk ''${nixToLua.resolve theWorstCat.exampleUnsafeFunc}("Hello World!", "and again!")'';
+  };
+}```
 
 ## Translators
 
@@ -119,12 +123,19 @@ running the above command will output the inspect print of the
 lua table generated from the [examples/yourNixValue.nix](./examples/yourNixValue.nix) file.
 
 ```lua
+Hello World!
+Hello World!
+and again!
 {
+  funcResults = {
+    test1 = "Hello World!",
+    test2 = "Hello World!and again!"
+  },
   theBestCat = "says meow!!",
   theWorstCat = {
     ["]=====]-!'.thing4"] = "couch is for scratching",
-    directmaybe = <function 1>,
-    directmaybe42 = <function 2>,
+    exampleSafeFunc = <function 1>,
+    exampleUnsafeFunc = <function 2>,
     hmm = { 6, "/nix/store/h4fjrinvqsw97mnn31izx51lyn5dd1q6-lolcat-100.0.1" },
     ["thing'1"] = { "MEOW", "]]' ]=][=[HISSS]]\"[[" },
     thing2 = { {
