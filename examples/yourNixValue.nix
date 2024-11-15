@@ -43,6 +43,41 @@
         return hi .. hello
       '';
     };
+    hasmeta = nixToLua.inline.types.with-meta.mk {
+      table = {
+        this = "is a test var";
+        inatesttable = "that will be translated to a lua table with a metatable";
+      };
+      meta = let tablevar = "tbl_in"; in {
+        inherit tablevar;
+        newtable = null;
+        meta = {
+          __call = nixToLua.inline.types.function-unsafe.mk {
+            args = [ "_" "attrpath" "..." ];
+            body = /*lua*/ ''
+              local strtable = {}
+              if type(attrpath) == "table" then
+                  strtable = attrpath
+              elseif type(attrpath) == "string" then
+                  for key in attrpath:gmatch("([^%.]+)") do
+                      table.insert(strtable, key)
+                  end
+              else
+                  print('function requires a { "list", "of", "strings" } or a "dot.separated.string"')
+                  return
+              end
+              if #strtable == 0 then return nil end
+              local tbl = ${tablevar};
+              for _, key in ipairs(strtable) do
+                if type(tbl) ~= "table" then return nil end
+                tbl = tbl[key]
+              end
+              return tbl
+            '';
+          };
+        };
+      };
+    };
   };
   funcResults = {
     test1 = nixToLua.inline.types.inline-safe.mk ''${nixToLua.resolve theWorstCat.exampleSafeFunc}("Hello World!")'';
