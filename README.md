@@ -74,7 +74,8 @@ outputs = { nixToLuaNonFlake, ... }: {
     test1 = nixToLua.inline.types.inline-safe.mk ''${nixToLua.resolve theWorstCat.exampleSafeFunc}("Hello World!")'';
     test2 = nixToLua.inline.types.inline-safe.mk ''${nixToLua.resolve theWorstCat.exampleUnsafeFunc}("Hello World!", "and again!")'';
   };
-}```
+}
+```
 
 ## Translators
 
