@@ -151,16 +151,3 @@ and again!
 ```bash
 nix run --show-trace github:BirdeeHub/nixToLua?dir=examples#anotherNixValue
 ```
-
-- Extending with new inline types:
-
-You will want access to the functions from nixToLua to define your type.
-So, first get a preliminary copy, and make it overridable.
-
-```nix
-n2l = pkgs.lib.makeOverridable (import "${nixToLua}/lib.nix") {}
-```
-
-Now you can `n2l.override { /* your typedefs here */ }` and you will get back a library outfitted to handle the new types.
-
-See the typedefs in [./lib.nix](./lib.nix) for examples.
