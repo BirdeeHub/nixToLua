@@ -108,9 +108,9 @@ can convert any nix to lua, EXCEPT FOR UNCALLED NIX FUNCTIONS.
 
 ## Helpers
 
-TODO: fill this out with the new scheme
-
-For now, go look at the examples.
+The [examples](./examples/yourNixValue.nix) will be a great teacher,
+however you may also view the help for the original version of this library
+in [nixCats](https://github.com/BirdeeHub/nixCats-nvim) at [nixCats.flake.outputs.utils.n2l](https://nixcats.org/nixCats_format#nixCats.flake.outputs.utils.n2l)
 
 ## Examples
 
