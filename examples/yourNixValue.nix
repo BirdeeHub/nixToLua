@@ -2,7 +2,7 @@
   theBestCat = "says meow!!";
   # yes even tortured inputs work.
   theWorstCat = {
-    thing'1 = [ "MEOW" '']]' ]=][=[HISSS]]"[['' ];
+    thing'1 = [ "MEOW]" '']]' ]=][=[HISSS]]"[['' ];
     thing2 = [
       {
         thing3 = [ "give" "treat" ];
