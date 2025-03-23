@@ -1,18 +1,16 @@
 # Copyright (c) 2023 BirdeeHub
 # Licensed under the MIT license
 with builtins; let
-  pipe = foldl' (x: f: f x);
   genStr = str: num: concatStringsSep "" (genList (_: str) num);
-  luaEnclose = str: pipe str [
-    (split "(\\[=*\\[)|(]=*])|(]$)")
-    (concatMap (x: if isList x then x else []))
-    (filter (x: x != null))
-    (map stringLength)
-    (foldl' (max: x: if x > max then x else max) 0)
-    (maxlen: if maxlen > 1 then maxlen - 1 else if maxlen == 1 then 1 else 0)
-    (genStr "=")
-    (eqs: "[${eqs}[${str}]${eqs}]")
-  ];
+  luaEnclose = str: str
+    |> split "(\\[=*\\[)|(]=*])|(]$)"
+    |> concatMap (x: if isList x then x else [])
+    |> filter (x: x != null)
+    |> map stringLength
+    |> foldl' (max: x: if x > max then x else max) 0
+    |> (maxlen: if maxlen > 1 then maxlen - 1 else if maxlen == 1 then 1 else 0)
+    |> genStr "="
+    |> (eqs: "[${eqs}[${str}]${eqs}]");
 
   mkEnum = id: proto: let
     filterAttrs = pred: set:
@@ -129,18 +127,16 @@ with builtins; let
       else if isAttrs value then "${luaTablePrinter level value}"
       else replacer (luaEnclose (toString value));
 
-    luaTablePrinter = level: set: pipe set [
-      (mapAttrs (n: v: "[ ${luaEnclose "${n}"} ] = ${doSingleLuaValue (level + 1) v}"))
-      attrValues
-      (concatStringsSep ",${nl_spc (level + 1)}")
-      (str: "{${nl_spc (level + 1)}${str}${nl_spc level}}")
-    ];
+    luaTablePrinter = level: set: set
+      |> mapAttrs (n: v: "[ ${luaEnclose "${n}"} ] = ${doSingleLuaValue (level + 1) v}")
+      |> attrValues
+      |> concatStringsSep ",${nl_spc (level + 1)}"
+      |> (str: "{${nl_spc (level + 1)}${str}${nl_spc level}}");
 
-    luaListPrinter = level: list: pipe list [
-      (map (doSingleLuaValue (level + 1)))
-      (concatStringsSep ",${nl_spc (level + 1)}")
-      (str: "{${nl_spc (level + 1)}${str}${nl_spc level}}")
-    ];
+    luaListPrinter = level: list: list
+      |> map (doSingleLuaValue (level + 1))
+      |> concatStringsSep ",${nl_spc (level + 1)}"
+      |> (str: "{${nl_spc (level + 1)}${str}${nl_spc level}}");
 
   in
   doSingleLuaValue _level input;
