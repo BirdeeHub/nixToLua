@@ -48,27 +48,27 @@ with builtins; let
       then "args attribute must be a list of strings containing valid lua identifier names"
       else true;
   in {
-    inline-safe = {
+    inline-unsafe = {
       default = (v: if v ? body then v else { body = v; });
+      fields = { body = "nil"; };
+      check = inlinecheck;
+      format = LI: "${LI.expr.body or "nil"}";
+    };
+    inline-safe = {
       fields = { body = "nil"; };
       check = inlinecheck;
       format = LI: "(assert(loadstring(${luaEnclose "return ${LI.expr.body or "nil"}"}))())";
     };
-    inline-unsafe = {
-      fields = { body = "nil"; };
-      check = inlinecheck;
-      format = LI: "${LI.expr.body or "nil"}";
+    function-unsafe = {
+      fields = { body = "return nil"; args = []; };
+      check = funccheck;
+      format = LI: ''(function(${concatStringsSep ", " (LI.expr.args or [])}) ${LI.expr.body or "return nil"} end)'';
     };
     function-safe = {
       fields = { body = "return nil"; args = []; };
       check = funccheck;
       format = LI:
         ''(assert(loadstring(${luaEnclose ''return (function(${concatStringsSep ", " (LI.expr.args or [])}) ${LI.expr.body or "return nil"} end)''}))())'';
-    };
-    function-unsafe = {
-      fields = { body = "return nil"; args = []; };
-      check = funccheck;
-      format = LI: ''(function(${concatStringsSep ", " (LI.expr.args or [])}) ${LI.expr.body or "return nil"} end)'';
     };
     with-meta = {
       fields = {
@@ -124,8 +124,8 @@ with builtins; let
       else if isPath value then luaEnclose "${value}"
       else if value ? outPath then luaEnclose "${value.outPath}"
       else if isDerivation value then luaEnclose "${value}"
-      else if isFunction (value.__functor or value) then addErrorContext ("nixCats.utils.n2l.toLua called on a function with these functionArgs: " + (toJSON (value.__functionArgs or functionArgs value)))
-        (throw "Lua cannot run nix functions. Either call your function first, or make a lua function using `utils.n2l.types.function-safe.mk`.")
+      else if isFunction (value.__functor or value) then addErrorContext ("n2l.toLua called on a function with these functionArgs: " + (toJSON (value.__functionArgs or functionArgs value)))
+        (throw "Lua cannot run nix functions. Either call your function first, or make a lua function using `n2l.types.function-safe.mk`.")
       else if isAttrs value then "${luaTablePrinter level value}"
       else replacer (luaEnclose (toString value));
 
@@ -160,6 +160,8 @@ in {
 
   inherit mkEnum inline toLuaFull;
   inherit (inline) types typeof member default_subtype;
+
+  mkLuaInline = inline.types.inline-unsafe.mk;
 
   resolve = value: let res = inline.resolve value; in
     if isFunction res then (res { pretty = false; }) else res;
