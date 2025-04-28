@@ -153,9 +153,9 @@ in {
 
   uglyLua = toLuaFull { pretty = false; formatstrings = false; };
 
-  toUnpacked = input:
-    if isList input
-    then concatStringsSep "," (map toLuaFull { pretty = true; formatstrings = false; } input)
+  toUnpacked = list:
+    if isList list
+    then concatStringsSep "," (map (toLuaFull { pretty = true; formatstrings = false; }) list)
     else throw "n2l.toUnpacked requires a list";
 
   inherit mkEnum inline toLuaFull;
