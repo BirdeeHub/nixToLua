@@ -48,27 +48,27 @@ with builtins; let
       then "args attribute must be a list of strings containing valid lua identifier names"
       else true;
   in {
-    inline-unsafe = {
-      default = (v: if v ? body then v else { body = v; });
-      fields = { body = "nil"; };
-      check = inlinecheck;
-      format = LI: "${LI.expr.body or "nil"}";
-    };
     inline-safe = {
+      default = (v: if v ? body then v else { body = v; });
       fields = { body = "nil"; };
       check = inlinecheck;
       format = LI: "(assert(loadstring(${luaEnclose "return ${LI.expr.body or "nil"}"}))())";
     };
-    function-unsafe = {
-      fields = { body = "return nil"; args = []; };
-      check = funccheck;
-      format = LI: ''(function(${concatStringsSep ", " (LI.expr.args or [])}) ${LI.expr.body or "return nil"} end)'';
+    inline-unsafe = {
+      fields = { body = "nil"; };
+      check = inlinecheck;
+      format = LI: "${LI.expr.body or "nil"}";
     };
     function-safe = {
       fields = { body = "return nil"; args = []; };
       check = funccheck;
       format = LI:
         ''(assert(loadstring(${luaEnclose ''return (function(${concatStringsSep ", " (LI.expr.args or [])}) ${LI.expr.body or "return nil"} end)''}))())'';
+    };
+    function-unsafe = {
+      fields = { body = "return nil"; args = []; };
+      check = funccheck;
+      format = LI: ''(function(${concatStringsSep ", " (LI.expr.args or [])}) ${LI.expr.body or "return nil"} end)'';
     };
     with-meta = {
       fields = {
@@ -147,7 +147,7 @@ with builtins; let
 
 in {
 
-  toLua = toLuaFull {};
+  toLua = toLuaFull { pretty = true; formatstrings = false; };
 
   prettyLua = toLuaFull { pretty = true; formatstrings = true; };
 
@@ -155,13 +155,13 @@ in {
 
   toUnpacked = input:
     if isList input
-    then concatStringsSep ",\n" (map toLuaFull {} input)
+    then concatStringsSep "," (map toLuaFull { pretty = true; formatstrings = false; } input)
     else throw "n2l.toUnpacked requires a list";
 
   inherit mkEnum inline toLuaFull;
   inherit (inline) types typeof member default_subtype;
 
-  mkLuaInline = inline.types.inline-unsafe.mk;
+  mkLuaInline = body: inline.types.inline-unsafe.mk { inherit body; };
 
   resolve = value: let res = inline.resolve value; in
     if isFunction res then (res { pretty = false; }) else res;
