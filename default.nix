@@ -153,10 +153,11 @@ in {
 
   uglyLua = toLuaFull { pretty = false; formatstrings = false; };
 
-  toUnpacked = list:
-    if isList list
-    then concatStringsSep "," (map (toLuaFull { pretty = true; formatstrings = false; }) list)
-    else throw "n2l.toUnpacked requires a list";
+  toUnpacked = list: pipe list [
+    (l: if isList l then l else throw "n2l.toUnpacked requires a list")
+    (map (toLuaFull { pretty = true; formatstrings = false; }))
+    (concatStringsSep ",")
+  ];
 
   inherit mkEnum inline toLuaFull;
   inherit (inline) types typeof member default_subtype;
